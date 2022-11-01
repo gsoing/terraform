@@ -1,0 +1,152 @@
+swagger: "2.0"
+info:
+  title: manga-api
+  description: Play
+  version: 1.0.0
+host: "my-cool-api"
+schemes:
+  - https
+basePath: /v1
+consumes:
+  - application/json
+produces:
+  - application/json
+x-google-backend:
+  address: ${CLOUD_RUN_URL}
+x-google-endpoints:
+- name: "my-cool-api"
+  allowCors: True
+parameters:
+  userId:
+    name: userId 
+    in: path
+    type: string
+    required: true
+paths:
+  /users:
+    options:
+      operationId: preflight_users
+      responses:
+        '204':
+          description: A successful response
+    get:
+      operationId: list_users
+      summary: Returns a list of users.
+      description: Optional extended description in Markdown.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/UserLight'
+    post:
+      operationId: create_user
+      summary: create a users
+      parameters:
+        - name: user
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+  /users/{userId}:
+    parameters:
+      - $ref: '#/parameters/userId'
+    options:
+      operationId: preflight
+      responses:
+        '204':
+          description: A successful response
+    get:
+      description: get user definitions
+      operationId: get_user
+      responses:
+        200:
+          description: the user
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: user not found
+  /users/{userId}/answers:
+    parameters:
+      - $ref: '#/parameters/userId'
+    options:
+      operationId: preflight_users_answers
+      responses:
+        '204':
+          description: A successful response
+    post:
+      description: add an answer
+      operationId: user_add_answer
+      parameters:
+        - name: answer
+          in: body
+          required: true
+          schema:
+            type: object
+            properties: 
+              answer: 
+                type: string
+      responses:
+        200:
+          description: the list of answer
+          schema:
+            type: array
+            items: 
+              type: string
+  /answers:
+    options:
+      operationId: preflight_answers
+      responses:
+        '204':
+          description: A successful response
+    post:
+      description: try an answers
+      operationId: try_answer
+      parameters:
+        - name: answers
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              try:
+                type: string
+      responses:
+        200: 
+          description: OK
+          schema:
+            type: object
+            properties:
+              distance:
+                description: score du résultat
+                type: number
+                format: float
+        412:
+          description: not the good one
+definitions:
+  UserLight:
+    type: object
+    properties: 
+      name:
+        type: string  
+      created:
+        type: string
+        format: date-time
+      updated: 
+        type: string
+        format: date-time
+  User: 
+    allOf:
+      - $ref: '#/definitions/UserLight'
+      - type: object
+        properties: 
+          answers:
+            type: array
+            items:
+              type: string
