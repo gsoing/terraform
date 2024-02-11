@@ -1,31 +1,46 @@
-# Managing infrastructure as code with Terraform, Cloud Build, and GitOps
+# Exemple de terraform
 
-This is the repo for the [Managing infrastructure as code with Terraform, Cloud Build, and GitOps](https://cloud.google.com/solutions/managing-infrastructure-as-code) tutorial. This tutorial explains how to manage infrastructure as code with Terraform and Cloud Build using the popular GitOps methodology. 
+Ce répertoire contient le code terraform nécessaire pour déployer l'infrastructure du TD.
+Il est composé de 4 fichiers:
+ * (variables.tf)[environments/prod/variables.tf]: il contient les variables pour configurer le projet
+ * (main.tf): configuration de terraform
+ * (front.tf): création et configuration du bucket pour le front
+ * (back.tf): création et configuration de l'infrastructure back
 
-## Configuring your **dev** environment
-
-Just for demostration, this step will:
- 1. Configure an apache2 http server on network '**dev**' and subnet '**dev**-subnet-01'
- 2. Open port 80 on firewall for this http server 
-
-```bash
-cd ../environments/dev
-terraform init
-terraform plan
-terraform apply
-terraform destroy
+## Configuration
+Il faut créer un projet dans GCP et un bucket. Le bucket doit avoir pour nom `episen-${student}-tfstate` ou la variable `student` est le nom de l'étudiant . 
+L'ensemble des informations du projet doit être renseigné dans le fichier [variables.tf](environements/prod/variables.tf).
+```terraform
+locals {
+  student  = "[nom de l'étudiant]"
+  project  = "[identifiant du projet]"
+  location = "[région par défaut]"
+}
 ```
 
-## Promoting your environment to **production**
+Terraform n'autorise pas les variables dans la déclaration des backend il faut donc modifier le fichier [main.tf](environments/prod/main.tf)
+```terraform
+terraform {
+  required_version = "~> 1.7.2"
+  backend "gcs" {
+    bucket = "episen-[student]-tfstate"
+    prefix = "env/guillaume"
+  }
+}
+```
 
-Once you have tested your app (in this example an apache2 http server), you can promote your configuration to prodution. This step will:
- 1. Configure an apache2 http server on network '**prod**' and subnet '**prod**-subnet-01'
- 2. Open port 80 on firewall for this http server 
-
-```bash
-cd ../prod
+## Déploiment
+Il faut d'abord permettre à Terraform de se connecter à GCP, en temps normal on utilise un compte de service ici on va utilser notre propre compte. Il faut donc configurer notre environnement: 
+```shell
+gcloud auth application-default login
+```
+On peut ensuite utiliser terraform
+```shell
+cd environments/prod
+# Initialise terraform
 terraform init
+# terraform décrit tout ce qu'il va faire
 terraform plan
+# on applique notre configuration (attention cela peut-être long)
 terraform apply
-terraform destroy
 ```

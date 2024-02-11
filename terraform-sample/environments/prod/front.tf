@@ -1,7 +1,7 @@
 // Front end infra
 resource "google_storage_bucket" "manga-front" {
   name     = "front-manga-${local.student}"
-  location = local.location
+  location = local.region
   versioning {
     enabled = true
   }

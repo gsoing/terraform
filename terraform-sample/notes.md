@@ -15,19 +15,16 @@ gcloud beta compute backend-services add-backend manga-api \
   --network-endpoint-group=manga-api \
   --network-endpoint-group-region=europe-west1
 
-
 gcloud compute backend-services add-backend manga-api \
   --network-endpoint-group=manga-api \
   --network-endpoint-group-region=europe-west1 
 
 gcloud beta compute backend-services create manga-api --global
 
+gcloud beta compute backend-services create manga-api \
+  --region=europe-west1
 
-  gcloud beta compute backend-services create manga-api \
-    --region=europe-west1
-
-      gcloud beta compute backend-services delete manga-api
-
+gcloud beta compute backend-services delete manga-api
 
 gcloud compute url-maps create api-gateway-url-map \
   --default-service api-gateway-backend-service
